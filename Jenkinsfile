@@ -4,7 +4,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // This will use the job’s SCM configuration
                 checkout scm
             }
         }
@@ -27,14 +26,20 @@ pipeline {
             }
         }
 
-        stage('Docker Run') {
+        stage('Docker Tag') {
             steps {
-                sh 'docker run --rm hello-world-java'
+                sh 'docker tag hello-world-java anurupkaran/hello-world-java:latest'
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker push anurupkaran/hello-world-java:latest'
+                }
             }
         }
     }
 }
-
-
-
 
