@@ -32,8 +32,8 @@ pipeline {
 
         stage('Kubernetes Deploy') {
             steps {
-                sh 'kubectl apply -f /deployment.yaml'
-                sh 'kubectl apply -f /service.yaml'
+                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f service.yaml'
                 sh 'kubectl rollout status deployment/hello-world-deployment'
             }
         }
