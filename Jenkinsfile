@@ -20,24 +20,27 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t hello-world-java .'
-            }
-        }
-
-        stage('Docker Tag') {
-            steps {
-                sh 'docker tag hello-world-java anurupkaran/hello-world-java:latest'
-            }
-        }
-
-        stage('Docker Push') {
+        stage('Docker Build & Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'Docker', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker build -t anurupkaran/hello-world-java:latest .'
                     sh 'docker push anurupkaran/hello-world-java:latest'
                 }
+            }
+        }
+
+        stage('Kubernetes Deploy') {
+            steps {
+                sh 'kubectl apply -f k8s/deployment.yaml'
+                sh 'kubectl apply -f k8s/service.yaml'
+                sh 'kubectl rollout status deployment/hello-world-deployment'
+            }
+        }
+
+        stage('Verify Pod') {
+            steps {
+                sh 'kubectl get pods -l app=hello-world'
             }
         }
     }
